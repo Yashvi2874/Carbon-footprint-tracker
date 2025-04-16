@@ -71,6 +71,27 @@ while ($row = mysqli_fetch_assoc($energyTrendResult)) {
     $energyValues[] = $row['total'];
 }
 
+// Get Transport Usage Data for the selected period
+$transportTrendQuery = mysqli_prepare($conn, 
+    "SELECT date, SUM(tm.carbon_emission * ut.distance_km) as total 
+     FROM user_transport ut 
+     JOIN transport_modes tm ON ut.transport_id = tm.id 
+     WHERE ut.user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL ? DAY)
+     GROUP BY date 
+     ORDER BY date ASC"
+);
+mysqli_stmt_bind_param($transportTrendQuery, "ii", $user_id, $dateInterval);
+mysqli_stmt_execute($transportTrendQuery);
+$transportTrendResult = mysqli_stmt_get_result($transportTrendQuery);
+
+$transportDates = [];
+$transportValues = [];
+while ($row = mysqli_fetch_assoc($transportTrendResult)) {
+    // Format date as 'Mon DD' (e.g., Jan 15)
+    $transportDates[] = date('M d', strtotime($row['date']));
+    $transportValues[] = $row['total'];
+}
+
 // Fetch appliances used
 $appliance_stmt = mysqli_prepare($conn, 
     "SELECT a.name, ua.usage_hours 
@@ -321,18 +342,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const energyChart = new Chart(energyCtx, {
         type: 'line',
         data: {
-            labels: <?php echo json_encode($energyDates); ?>,
-            datasets: [{
-                label: 'Energy Usage (kWh)',
-                data: <?php echo json_encode($energyValues); ?>,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                tension: 0.3,
-                pointBackgroundColor: 'rgba(75, 192, 192, 1)',
-                pointRadius: 3,
-                pointHoverRadius: 5
-            }]
+            labels: <?php echo json_encode($energyDates); ?>, // Use energy dates as the x-axis
+            datasets: [
+                {
+                    label: 'Energy Usage (kWh)',
+                    data: <?php echo json_encode($energyValues); ?>,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: 'Transport Emissions (kg CO₂)',
+                    data: <?php echo json_encode($transportValues); ?>,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -342,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     display: false
                 },
                 legend: {
-                    display: false
+                    display: true
                 },
                 tooltip: {
                     mode: 'index',
@@ -354,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'kWh'
+                        text: 'kWh / kg CO₂'
                     },
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)'

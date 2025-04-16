@@ -21,6 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION['error'] = "Please fill in all required fields.";
     } elseif ($password !== $confirm_password) {
         $_SESSION['error'] = "Passwords do not match.";
+    } elseif (!preg_match('/^(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/', $password)) {
+        $_SESSION['error'] = "Password must be at least 6 characters long, include at least 1 number, and 1 special character.";
     } else {
         // Check if email already exists
         $check_query = "SELECT id FROM users WHERE email = ?";
@@ -45,12 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             
             if ($insert_result) {
                 $user_id = mysqli_insert_id($conn);
-                $_SESSION['user_id'] = $user_id;
-                $_SESSION['user_name'] = $name;
-                
-                $_SESSION['success'] = "Registration successful!";
+                $_SESSION['success'] = "Registration successful! Please log in.";
                 mysqli_stmt_close($insert_stmt);
-                header("Location: " . BASE_URL . "/views/dashboard.php");
+                header("Location: " . BASE_URL . "/views/login.php"); // Redirect to login page
                 exit();
             } else {
                 $_SESSION['error'] = "Registration failed. Please try again.";
@@ -65,6 +64,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <h1>Register</h1>
     
     <div class="card">
+        <!-- Display error message -->
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="error-message">
+                <?php 
+                    echo $_SESSION['error']; 
+                    unset($_SESSION['error']);
+                ?>
+            </div>
+        <?php endif; ?>
+        
         <form method="POST">
             <label for="name">Name:</label>
             <input type="text" name="name" required>
@@ -73,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <input type="email" name="email" required>
             
             <label for="password">Password:</label>
-            <input type="password" name="password" required>
+            <input type="password" name="password" required pattern="^(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$" title="Password must be at least 6 characters long, include at least 1 number, and 1 special character.">
             
             <label for="confirm_password">Confirm Password:</label>
             <input type="password" name="confirm_password" required>

@@ -1,6 +1,4 @@
-/* Base Styles */
 :root {
-    /* Dark Mode Color Palette */
     --bg-primary: #121212;
     --bg-secondary: #1e1e1e;
     --bg-card: #252525;
@@ -82,7 +80,6 @@ main {
 }
 
 /* Navigation */
-/* Navbar improvements */
 nav {
     background-color: var(--bg-secondary);
     padding: 0;
@@ -207,6 +204,12 @@ button {
 
 button:hover {
     background-color: var(--primary-dark);
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
 /* Dashboard */
@@ -413,6 +416,7 @@ button:hover {
 }
 
 .features, .how-it-works {
+    background-color: black;
     padding: 80px 0;
 }
 
@@ -495,7 +499,6 @@ footer {
     }
 }
 
-/* Dashboard Charts */
 .dashboard-charts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -508,7 +511,6 @@ canvas {
     width: 100% !important;
 }
 
-/* Quick Recommendations */
 .quick-recommendations {
     background-color: var(--bg-card);
     border-radius: 12px;
@@ -557,7 +559,6 @@ canvas {
     text-decoration: underline;
 }
 
-/* Recommendations Page */
 .recommendations-sections {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -565,7 +566,6 @@ canvas {
     margin: 30px 0;
 }
 
-/* Text colors */
 .text-success {
     color: var(--success-color);
 }

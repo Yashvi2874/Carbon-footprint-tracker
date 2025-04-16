@@ -49,6 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <h1>Login</h1>
     
     <div class="card">
+        <!-- Display error message -->
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="error-message">
+                <?php 
+                    echo $_SESSION['error']; 
+                    unset($_SESSION['error']);
+                ?>
+            </div>
+        <?php endif; ?>
         <form method="POST">
             <label for="email">Email:</label>
             <input type="email" name="email" required>
